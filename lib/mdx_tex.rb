@@ -3,6 +3,7 @@
 require 'mdx_tex/version'
 require 'mdx_tex/configuration'
 require 'mdx_tex/to_textile'
+require 'mdx_tex/to_markdown'
 
 module MdxTex
   class << self
@@ -19,6 +20,10 @@ module MdxTex
     def to_textile(markdown:, **options)
       merged = { header_level: configuration.header_level, list_depth: configuration.list_depth }.merge(options)
       MdxTex::ToTextile.new(**merged).execute(markdown)
+    end
+
+    def to_markdown(textile:)
+      MdxTex::ToMarkdown.new.execute(textile)
     end
 
     def load_string_extension!

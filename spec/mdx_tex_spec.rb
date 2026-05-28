@@ -17,6 +17,46 @@ RSpec.describe MdxTex do
     end
   end
 
+  describe '.to_markdown' do
+    it 'converts a Textile heading' do
+      expect(described_class.to_markdown(textile: 'h3. Heading')).to eq('### Heading')
+    end
+
+    it 'returns nil for nil input' do
+      expect(described_class.to_markdown(textile: nil)).to be_nil
+    end
+  end
+
+  describe 'round-trip conversion (Markdown -> Textile -> Markdown)' do
+    # Inputs that round-trip cleanly need to use the canonical forms that .to_textile emits:
+    # - header depth matches the configured header_level (h3 by default, so `###`)
+    # - bold uses ** (not __)
+    # - unordered lists begin at depth 1 (matching list_depth: 3)
+    # - ordered list are 1-indexed and increment for each siblings
+    it 'preserves the input through Markdown -> Textile -> Markdown' do
+      markdown = <<~MD
+        ### **Title**
+
+        - item one with **bold word** in the middle
+        - **item two**
+          - nested A
+          - nested B with **emphasis** inline
+        - item three
+
+        1. **first**
+        2. second with a **bold span** mid-sentence
+          1. sub one
+          2. sub two
+        3. third
+      MD
+
+      textile = described_class.to_textile(markdown: markdown)
+      round_tripped = described_class.to_markdown(textile: textile)
+
+      expect(round_tripped).to eq(markdown)
+    end
+  end
+
   describe '.configure' do
     after { described_class.configuration = nil }
 
@@ -95,6 +135,10 @@ RSpec.describe MdxTex do
 
     it 'forwards options to MdxTex.to_textile' do
       expect('# Heading'.to_textile(header_level: 'h1')).to eq('h1. Heading')
+    end
+
+    it 'adds #to_markdown to String' do
+      expect('h3. Heading'.to_markdown).to eq('### Heading')
     end
   end
 end
