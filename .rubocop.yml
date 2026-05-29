@@ -5,3 +5,9 @@ AllCops:
 
 Style/Documentation:
   Enabled: false
+
+RSpec/ExampleLength:
+  Max: 60
+
+RSpec/DescribeMethod:
+  Enabled: false
